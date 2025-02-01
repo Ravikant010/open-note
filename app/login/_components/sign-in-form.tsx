@@ -1,6 +1,6 @@
 "use client"
 import { useState } from 'react'
-import { z } from 'zod'
+import { string, z } from 'zod'
 import { ZodError } from 'zod'
 import { Mail, Lock, Github, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -10,6 +10,8 @@ import { Separator } from '@/components/ui/separator'
 import { motion } from 'framer-motion'
 import { useToast } from '@/hooks/use-toast'
 import { ToastAction } from "@/components/ui/toast"
+import { getUserByEmail } from '@/actions/action'
+import { useRouter } from 'next/navigation'
 
 const signInSchema = z.object({
   email: z.string().email(),
@@ -20,6 +22,7 @@ const MotionButton = motion(Button)
 const MotionInput = motion(Input)
 
 export function SignInForm() {
+  const router= useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -57,8 +60,12 @@ export function SignInForm() {
         description: "Friday, February 10, 2023 at 5:57 PM",
         // action:  <ToastAction altText='close'><X className="h-4 w-4 text-white" />  </ToastAction>
       })
-
+  const if_user =   await  getUserByEmail(data)
+  
+  if(if_user)
+    return router.push("/")
     } catch (error) {
+      console.error('Error signing in:', error)
       if (error instanceof ZodError) {
         error.issues.forEach((issue) => {
             toast({

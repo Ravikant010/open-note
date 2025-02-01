@@ -1,5 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
+import { env } from "@/env";
 import { BrandingSF_Font, Pacifico_Regular } from "@/lib/font";
 
 
@@ -71,6 +72,7 @@ const words = [
 ];
 
 export default function OnboardingPage() {
+
   return (
     <div className ={`${BrandingSF_Font.className}`}>
     <div className="min-h-screen w-full relative overflow-hidden">
