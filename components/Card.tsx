@@ -1,41 +1,27 @@
-import { Heart, MessageCircle, Share2 } from "lucide-react"; // Import Lucide icons
-import React, { useState } from "react";
+import { Heart, MessageCircle, Share2 } from "lucide-react"; 
+import React, { useEffect, useState } from "react";
 import { CardContent, Card } from "./ui/card";
 import Link from "next/link";
-
-
+import DOMPurify from 'dompurify';
+import { likeContent } from "@/actions/reactionAction";
 type PostCardProps = {
   id: string;
   title: string;
   preview: string;
-  imageUrl?: string;
-  initialLikes?: number;
-  initialComments?: number;
-  initialShares?: number;
-};
-
+}
 export default function PostCard({
   id,
   title,
   preview,
-  imageUrl,
-  initialLikes = 0,
-  initialComments = 0,
-  initialShares = 0,
 }: PostCardProps) {
-  const [likes, setLikes] = useState(initialLikes);
-  const [comments, setComments] = useState(initialComments);
-  const [shares, setShares] = useState(initialShares);
-
-  const handleLike = () => setLikes(likes + 1);
-  const handleComment = () => setComments(comments + 1);
-  const handleShare = () => setShares(shares + 1);
-
+  const sanitizeHTML = (dirty: string) => ({
+    __html: DOMPurify.sanitize(dirty)
+});
   return (
     <div>
-      <Link href={`/post/${id}`}>
-        <Card key={id} className="min-w-[250px] shadow-none hover:shadow-md transition-shadow duration-300">
-          {imageUrl && (
+      
+        <Card key={id} className="min-w-[250px] shadow-none hover:shadow-md transition-shadow duration-300 max-h-44 line-clamp-2">
+        <Link href={`/post/${id}`}> {/* {imageUrl && (
             <div
               className="aspect-video w-full bg-muted"
               style={{
@@ -44,76 +30,117 @@ export default function PostCard({
                 backgroundPosition: "center",
               }}
             />
-          )}
+          )} */}
           <CardContent className="p-4">
             <h3 className="font-semibold mb-2">{title}</h3>
-            <p className="text-sm text-muted-foreground">{preview}</p>
+            <p 
+    className="text-sm text-muted-foreground line-clamp-2"
+    dangerouslySetInnerHTML={sanitizeHTML(preview)}
+/>
           </CardContent>
-
           {/* Post Footer */}
+          </Link>
           <PostFooter
-            likes={likes}
-            comments={comments}
-            shares={shares}
-            onLike={handleLike}
-            onComment={handleComment}
-            onShare={handleShare}
+            userId="a9266fbe-cb95-4e9e-9c23-bf3a1494bb3d"
+            postId={id}
           />
         </Card>
-      </Link>
+ 
     </div>
   );
 }
-
 type PostFooterProps = {
-  likes: number;
-  comments: number;
-  shares: number;
-  onLike: () => void;
-  onComment: () => void;
-  onShare: () => void;
+  userId: string;
+  postId: string;
 };
-
-const PostFooter: React.FC<PostFooterProps> = ({
-  likes,
-  comments,
-  shares,
-  onLike,
-  onComment,
-  onShare,
-}) => {
-  return (
-    <div className="flex items-center justify-between mt-4 p-4 border-t border-gray-200">
-      <div className="flex gap-4">
-        {/* Like Button */}
-        <button
-          onClick={onLike}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
-        >
-          <Heart className="h-5 w-5" />
-          {likes}
-        </button>
-
-        {/* Comment Button */}
-        <button
-          onClick={onComment}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
-        >
-          <MessageCircle className="h-5 w-5" />
-          {comments}
-        </button>
-
-        {/* Share Button */}
-        <button
-          onClick={onShare}
-          className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
-        >
-          <Share2 className="h-5 w-5" />
-          {shares}
-        </button>
-      </div>
-    </div>
-  );
+import { Button } from '@/components/ui/button'; 
+import { addComment, shareContent, getPostStats } from '@/actions/reactionAction'; 
+const PostFooter: React.FC<PostFooterProps> = ({ postId, userId }) => {
+    const [likes, setLikes] = useState(0);
+    const [comments, setComments] = useState(0);
+    const [shares, setShares] = useState(0);
+    useEffect(() => {
+        const fetchPostStats = async () => {
+            const result = await getPostStats(postId);
+            if (result.success) {
+                setLikes(result.likes || 0);
+                setComments(result.comments || 0);
+                setShares(result.shares || 0);
+            } else {
+                console.error(result.message || "Failed to fetch post stats.");
+            }
+        };
+        fetchPostStats();
+    }, [postId]);
+    /**
+     * Handle Like Action
+     */
+    const handleLike = async () => {
+            const result = await likeContent({ contentId: postId, userId });
+            if (result.success) {
+                setLikes(likes + 1); 
+            } else {
+                alert(result.message || "Failed to like the post.");
+            }
+        };
+    /**
+     * Handle Comment Action
+     */
+    const handleComment = async () => {
+        const commentBody = prompt("Enter your comment:");
+        if (!commentBody) return;
+        const result = await addComment({ contentId: postId, commentBody, userId });
+        if (result.success) {
+            setComments(comments + 1); 
+        } else {
+            alert(result.message || "Failed to add a comment.");
+        }
+    };
+    /**
+     * Handle Share Action
+     */
+    const handleShare = async () => {
+        const result = await shareContent({ contentId: postId });
+        if (result.success) {
+            setShares(shares + 1); 
+        } else {
+            alert(result.message || "Failed to share the post.");
+        }
+    };
+    return (
+        <div className="flex items-center justify-between mt-4 p-4 border-t border-gray-200">
+            <div className="flex gap-4">
+                {/* Like Button */}
+                <Button
+                    onClick={handleLike}
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
+                >
+                    <Heart className="h-5 w-5" />
+                    {likes}
+                </Button>
+                {/* Comment Button */}
+                <Button
+                    onClick={handleComment}
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
+                >
+                    <MessageCircle className="h-5 w-5" />
+                    {comments}
+                </Button>
+                {/* Share Button */}
+                <Button
+                    onClick={handleShare}
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
+                >
+                    <Share2 className="h-5 w-5" />
+                    {shares}
+                </Button>
+            </div>
+        </div>
+    );
 };
-
-

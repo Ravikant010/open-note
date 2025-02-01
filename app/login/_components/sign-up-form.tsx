@@ -10,12 +10,9 @@ import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@radix-ui/react-toast";
 import { createUser } from "@/actions/action";
-
-// Create motion-enhanced components
 const MotionButton = motion(Button);
 const MotionCheckbox = motion(Checkbox);
 const MotionInput = motion(Input);
-
 const signUpSchema = z
   .object({
     name: z.string().min(2),
@@ -30,7 +27,6 @@ const signUpSchema = z
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
-
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -43,25 +39,20 @@ const containerVariants = {
     },
   },
 };
-
 const itemVariants = {
   hidden: { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0 },
 };
-
-export function   SignUpForm() {
+export function SignUpForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [terms, setTerms] = useState(false);
   const { toast } = useToast();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
     try {
-      // Validate data with Zod schema
       const validatedData = signUpSchema.parse({
         name,
         email,
@@ -69,13 +60,8 @@ export function   SignUpForm() {
         confirmPassword,
         terms,
       });
-  
       console.log("Validated sign-up data:", validatedData);
-  
-      // Call the API to create the user
       await createUser(validatedData);
-  
-      // Show success message
       toast({
         title: "Sign Up Successful!",
         description: "Your account has been created successfully.",
@@ -83,9 +69,7 @@ export function   SignUpForm() {
       });
     } catch (error) {
       console.error("Error during sign-up:", error);
-  
       if (error instanceof z.ZodError) {
-        // Handle Zod validation errors
         error.errors.forEach((err) => {
           toast({
             title: "Validation Error",
@@ -94,14 +78,13 @@ export function   SignUpForm() {
           });
         });
       } else if (error instanceof Error) {
-        // Handle generic errors
         toast({
           title: "Unexpected Error",
-          description: error.message || "An unexpected error occurred. Please try again.",
+          description:
+            error.message || "An unexpected error occurred. Please try again.",
           variant: "destructive",
         });
       } else {
-        // Handle unknown errors
         toast({
           title: "Unexpected Error",
           description: "An unexpected error occurred. Please try again.",
@@ -110,7 +93,6 @@ export function   SignUpForm() {
       }
     }
   };
-
   return (
     <motion.form
       onSubmit={handleSubmit}
@@ -132,7 +114,6 @@ export function   SignUpForm() {
           />
         </div>
       </motion.div>
-
       <motion.div variants={itemVariants} className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <div className="relative">
@@ -146,7 +127,6 @@ export function   SignUpForm() {
           />
         </div>
       </motion.div>
-
       <motion.div variants={itemVariants} className="space-y-2">
         <Label htmlFor="password">Password</Label>
         <div className="relative">
@@ -160,7 +140,6 @@ export function   SignUpForm() {
           />
         </div>
       </motion.div>
-
       <motion.div variants={itemVariants} className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm Password</Label>
         <div className="relative">
@@ -174,7 +153,6 @@ export function   SignUpForm() {
           />
         </div>
       </motion.div>
-
       <motion.div
         variants={itemVariants}
         className="flex items-center space-x-2"
@@ -191,7 +169,6 @@ export function   SignUpForm() {
           I agree to the terms of service
         </Label>
       </motion.div>
-
       <MotionButton
         type="submit"
         className="w-full"

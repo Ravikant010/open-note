@@ -49,43 +49,58 @@ export function SignInForm() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+  
     try {
-      const data = signInSchema.parse({ email, password })
-      // Handle successful sign in
-      console.log('Sign in data:', data)
+      // Validate input data using Zod schema
+      const validatedData = signInSchema.parse({ email, password });
+      console.log('Sign in data:', validatedData);
+  
+      // Call the API route to authenticate the user
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validatedData),
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        // Handle API errors (e.g., invalid credentials)
+        throw new Error(result.error || 'An error occurred during sign-in');
+      }
+  
+      // Handle successful sign-in
       toast({
         title: "Successfully signed in!",
-        description: "Friday, February 10, 2023 at 5:57 PM",
-        // action:  <ToastAction altText='close'><X className="h-4 w-4 text-white" />  </ToastAction>
-      })
-  const if_user =   await  getUserByEmail(data)
+        description: "You have been logged in successfully.",
+        variant: "default",
+      });
   
-  if(if_user)
-    return router.push("/")
+      // Redirect to the dashboard or home page
+      router.push('/');
     } catch (error) {
-      console.error('Error signing in:', error)
+      console.error('Error signing in:', error);
+  
       if (error instanceof ZodError) {
-        error.issues.forEach((issue) => {
-            toast({
-                title:  issue.message,
-                description: "Friday, February 10, 2023 at 5:57 PM",
-                variant: "destructive",
-                // action: <ToastAction altText='close'><X className="h-4 w-4 text-white" />  </ToastAction>
-              })
-        })
+        // Handle Zod validation errors
+        error.errors.forEach((issue) => {
+          toast({
+            title: issue.message,
+            description: "Please correct the errors and try again.",
+            variant: "destructive",
+          });
+        });
       } else {
-         toast({
-                title:  "'An unexpected error occurred",
-                description: "Friday, February 10, 2023 at 5:57 PM",
-                variant: "destructive",
-                // action:  <ToastAction altText='close'><X className="h-4 w-4 text-white" />  </ToastAction>
-              })
-
+        // Handle unexpected errors
+        toast({
+          title: "An unexpected error occurred",
+          description: (error as Error).message || "Please try again later.",
+          variant: "destructive",
+        });
       }
     }
-  }
+  };
 
   const handleGoogleSignIn = () => {
     // Handle Google OAuth

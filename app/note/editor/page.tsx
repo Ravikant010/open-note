@@ -90,6 +90,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { createNote } from "@/actions/action";
+import { useRouter } from "next/navigation";
+import { getSession } from "@/lib/session";
 const lowlight = createLowlight(common);
 interface ButtonGroupProps {
   children: React.ReactNode;
@@ -269,6 +272,14 @@ const TextEditor = () => {
     if (!documentTitle.trim()) setDocumentTitle("Untitled Document");
   };
   if (!editor) return null;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await createNote({ title: documentTitle, body: editor.getHTML() });
+      useRouter().push('/notes');
+    } catch (error) {
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <Card className="max-w-[850px] mx-auto shadow-sm">
@@ -278,8 +289,9 @@ const TextEditor = () => {
             <div className="space-y-1 flex-1">
             </div>
             <Button      variant="outline"
-              size="sm" className="w-20 mx-4 px-10" onClick={()=>{
+              size="sm" className="w-20 mx-4 px-10" onClick={async(e)=>{
                 console.log(editor.getHTML())
+             await   handleSubmit(e)
               }}>
                 Post
             </Button>

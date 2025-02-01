@@ -60,7 +60,9 @@ export default function Home() {
       <Hero />
       <Page />
       <Footer/> */}
-      <OnBoardingPage/>
+      <PostsPage/>
+{/* <PostsPage /> */}
+      
       {/* <DashboardPage /> */}
     </main>
   );
@@ -70,8 +72,59 @@ export default function Home() {
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import OnBoardingPage, { OnBoarding } from "@/components/on-baording";
+import React from 'react';
+import PostCard from '@/components/Card';
+import { getUserPosts } from "@/actions/action";
+import { ContentSelect } from "@/db/schema";
 
 
+export function PostsPage() {
+  const [posts, setPosts] = useState<ContentSelect[] | []>([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const { success, data } = await getUserPosts();
+        console.log(data)
+        if (success && data) {
+          setPosts(data);
+        } else {
+          setError('Failed to load posts.');
+        }
+      } catch (err) {
+        setError('Failed to fetch posts. Please try again later.');
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  if (error) {
+    return <p className="text-center text-red-500">{error}</p>;
+  }
+
+  if (!posts) {
+    return <p className="text-center text-gray-500">Loading posts...</p>;
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Latest Posts</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {posts.map((post) => (
+          <PostCard
+            key={post.id}
+            id={post.id}
+            title={post.title}
+            preview={post.body}
+         
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 export  function DashboardPage() {
   return (
     <div className="min-h-screen bg-muted/40 p-6">

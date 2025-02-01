@@ -15,6 +15,13 @@
       "when": 1738353404073,
       "tag": "0001_clean_kylun",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1738408696959,
+      "tag": "0002_chunky_talisman",
+      "breakpoints": true
     }
   ]
 }
