@@ -5,7 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ChevronDown, Plus } from "lucide-react"
 
 
-import { Sidebar } from "@/components/sidebar"
+import { Sidebar } from "@/components/Nav-sidebar"
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
 import { BrandingSF_Font, Pacifico_Regular } from "@/lib/font"
 export default function OnBoardingPage() {

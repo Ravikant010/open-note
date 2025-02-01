@@ -20,10 +20,10 @@ export default async function AuthorCard({ postId }: AuthorCardProps) {
 
   // const { name, username, bio, avatarUrl, joinedDate, location, website } = result.data;
 
-  const { name, username,  joinedDate } = result.data ;
+  const { name, username, joinedDate } = result.data || { name: null, username: "", joinedDate: "" };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full shadow-none">
       <CardContent className="p-6">
         <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
           {/* Avatar */}
@@ -59,12 +59,12 @@ export default async function AuthorCard({ postId }: AuthorCardProps) {
             </div>
             {/* <p className="text-sm">{bio}</p> */}
             <div className="flex flex-wrap justify-center sm:justify-start gap-2 pt-2">
-              <Button variant="outline" size="sm">
+              {/* <Button variant="outline" size="sm">
                 Follow
               </Button>
               <Button variant="outline" size="sm">
                 Message
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>

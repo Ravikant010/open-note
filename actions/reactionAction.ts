@@ -210,3 +210,37 @@ export async function getPostStats(postId: string) {
         return { success: false, message: "Failed to fetch post stats." };
     }
 }
+
+
+/**
+ * Fetch comments for a specific post by its ID.
+ */
+export async function getCommentsByPostId(postId: string) {
+    try {
+        const result = await db.query.comments.findMany({
+            where: eq(comments.contentId, postId),
+            with: {
+                user: true, // Fetch the user details for each comment
+            },
+            orderBy: (comment, { desc }) => [desc(comment.createdAt)], // Order by newest first
+        });
+
+        if (!result || result.length === 0) {
+            return { success: false, message: "No comments found." };
+        }
+
+        // Map the comments to a simplified format
+        const formattedComments = result.map((comment) => ({
+            id: comment.id,
+            author: comment.user.name,
+            // avatar: comment.user.avatarUrl || `${comment.user.name[0]}`, // Use the first letter of the name as fallback
+            content: comment.body,
+            createdAt: comment.createdAt.toISOString(),
+        }));
+
+        return { success: true, data: formattedComments };
+    } catch (error) {
+        console.error("Error fetching comments:", error);
+        return { success: false, message: "Failed to fetch comments." };
+    }
+}

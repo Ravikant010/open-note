@@ -9,7 +9,7 @@ import { BrandingSF_Font, Pacifico_Regular } from '@/lib/font';
 
 import PostCard from '@/components/Card';
 import { getUserPosts } from '@/actions/action';
-import { ContentSelect, ContentType } from '@/db/schema';
+import { ContentSelect } from '@/db/schema';
 
 export  function PostsPage() {
     const [posts, setPosts] = useState<ContentSelect[]>([]);

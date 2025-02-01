@@ -20,7 +20,7 @@ export default function PostCard({
   return (
     <div>
       
-        <Card key={id} className="min-w-[250px] shadow-none hover:shadow-md transition-shadow duration-300 max-h-44 line-clamp-2">
+        <Card key={id} className="min-w-[250px] shadow-none hover:shadow-md transition-shadow duration-300 h-48 line-clamp-2">
         <Link href={`/post/${id}`}> {/* {imageUrl && (
             <div
               className="aspect-video w-full bg-muted"
@@ -32,7 +32,7 @@ export default function PostCard({
             />
           )} */}
           <CardContent className="p-4">
-            <h3 className="font-semibold mb-2">{title}</h3>
+            <h3 className="font-semibold mb-2 line-clamp-2">{title}</h3>
             <p 
     className="text-sm text-muted-foreground line-clamp-2"
     dangerouslySetInnerHTML={sanitizeHTML(preview)}
