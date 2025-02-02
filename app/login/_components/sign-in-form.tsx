@@ -166,7 +166,7 @@ const {toast} = useToast()
           </MotionButton>
         </motion.div>
 
-        <motion.div 
+        {/* <motion.div 
           className="text-center text-sm"
           variants={itemVariants}
         >
@@ -227,7 +227,7 @@ const {toast} = useToast()
             <Github className="h-4 w-4" />
             <span>Continue with GitHub</span>
           </motion.button>
-        </motion.div>
+        </motion.div> */}
       </form>
     </motion.div>
   )
