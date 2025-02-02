@@ -6,7 +6,7 @@ export async function middleware(request:NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes (no authentication required)
-  const publicRoutes = ['/login', '/signup', "/profile", "/post/[id]"];
+  const publicRoutes = ['/login', '/signup', "/profile", "/post/:id"];
 
   // Check if the user is logged in
   const isAuthenticated = await isLoggedIn();
