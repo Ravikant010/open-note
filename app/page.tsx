@@ -161,6 +161,7 @@ import { fetchAllPosts, getLatestPosts } from "@/actions/noteActions";
  
         console.log(data);
         if (success && data) {
+          //@ts-ignore
           setPosts(data);
         } else {
           setError("Failed to load posts.");
