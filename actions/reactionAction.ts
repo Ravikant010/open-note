@@ -9,8 +9,13 @@ import { eq, and } from 'drizzle-orm';
  * Like a piece of content.
  * Adds the user's ID to the `likes` table if they haven't already liked it.
  */
-export async function likeContent(args: { contentId: string; userId: string }) {
-    const { contentId, userId } = args;
+export async function likeContent(args: { contentId: string; userId?: string }) {
+    const { contentId } = args;
+    const userId = args.userId || (await getSession())?.userId;
+
+    if (!userId) {
+        return { success: false, message: "User not authenticated." };
+    }
 
     try {
         // Check if the user has already liked the content
@@ -69,7 +74,7 @@ export async function unlikeContent(args: { contentId: string; userId: string })
 /**
  * Add a comment to a piece of content.
  */
-export async function addComment(args: { contentId: string; userId: string; commentBody: string }) {
+export async function addComment(args: { contentId: string; userId?: string; commentBody: string }) {
     const { contentId, commentBody } = args;
     const session = await getSession();
     const userId = session?.userId;

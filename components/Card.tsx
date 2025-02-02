@@ -21,7 +21,9 @@ export default function PostCard({
     <div>
       
         <Card key={id} className="min-w-[250px] shadow-none hover:shadow-md transition-shadow duration-300 h-48 line-clamp-2">
-        <Link href={`/post/${id}`}> {/* {imageUrl && (
+        <Link href={`/post/${id}`}>
+        
+         {/* {imageUrl && (
             <div
               className="aspect-video w-full bg-muted"
               style={{
@@ -31,17 +33,16 @@ export default function PostCard({
               }}
             />
           )} */}
-          <CardContent className="p-4">
+          <CardContent className="p-4 h-28">
             <h3 className="font-semibold mb-2 line-clamp-2">{title}</h3>
-            <p 
-    className="text-sm text-muted-foreground line-clamp-2"
+            <p  
+    className="text-sm text-muted-foreground line-clamp-3"
     dangerouslySetInnerHTML={sanitizeHTML(preview)}
 />
           </CardContent>
-          {/* Post Footer */}
+      
           </Link>
           <PostFooter
-            userId="a9266fbe-cb95-4e9e-9c23-bf3a1494bb3d"
             postId={id}
           />
         </Card>
@@ -50,12 +51,12 @@ export default function PostCard({
   );
 }
 type PostFooterProps = {
-  userId: string;
+  userId?: string;
   postId: string;
 };
 import { Button } from '@/components/ui/button'; 
 import { addComment, shareContent, getPostStats } from '@/actions/reactionAction'; 
-const PostFooter: React.FC<PostFooterProps> = ({ postId, userId }) => {
+const PostFooter: React.FC<PostFooterProps> = ({ postId }) => {
     const [likes, setLikes] = useState(0);
     const [comments, setComments] = useState(0);
     const [shares, setShares] = useState(0);
@@ -76,7 +77,7 @@ const PostFooter: React.FC<PostFooterProps> = ({ postId, userId }) => {
      * Handle Like Action
      */
     const handleLike = async () => {
-            const result = await likeContent({ contentId: postId, userId });
+            const result = await likeContent({ contentId: postId });
             if (result.success) {
                 setLikes(likes + 1); 
             } else {
@@ -89,7 +90,7 @@ const PostFooter: React.FC<PostFooterProps> = ({ postId, userId }) => {
     const handleComment = async () => {
         const commentBody = prompt("Enter your comment:");
         if (!commentBody) return;
-        const result = await addComment({ contentId: postId, commentBody, userId });
+        const result = await addComment({ contentId: postId, commentBody });
         if (result.success) {
             setComments(comments + 1); 
         } else {
@@ -108,7 +109,7 @@ const PostFooter: React.FC<PostFooterProps> = ({ postId, userId }) => {
         }
     };
     return (
-        <div className="flex items-center justify-between mt-4 p-4 border-t border-gray-200">
+        <div className="flex items-center justify-between mt-4 p-4 border-t border-gray-200 h-fit ">
             <div className="flex gap-4">
                 {/* Like Button */}
                 <Button
@@ -131,7 +132,7 @@ const PostFooter: React.FC<PostFooterProps> = ({ postId, userId }) => {
                     {comments}
                 </Button>
                 {/* Share Button */}
-                <Button
+                {/* <Button
                     onClick={handleShare}
                     variant="ghost"
                     size="sm"
@@ -139,7 +140,7 @@ const PostFooter: React.FC<PostFooterProps> = ({ postId, userId }) => {
                 >
                     <Share2 className="h-5 w-5" />
                     {shares}
-                </Button>
+                </Button> */}
             </div>
         </div>
     );

@@ -1,68 +1,62 @@
-// import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-// import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Textarea } from "@/components/ui/textarea"
+'use client';
 
-// const dummyComments = [
-//   { id: 1, author: "Alice Johnson", content: "Great article! I learned a lot.", avatar: "AJ" },
-//   { id: 2, author: "Bob Smith", content: "I have a question about the third point. Can you elaborate?", avatar: "BS" },
-//   { id: 3, author: "Carol White", content: "This is exactly what I needed. Thanks for sharing!", avatar: "CW" },
-// ]
-
-// export function CommentSection() {
-//   return (
-//     <div className="space-y-4">
-//       <h2 className="text-2xl font-bold">Comments</h2>
-//       {dummyComments.map((comment) => (
-//         <Card key={comment.id}>
-//           <CardHeader>
-//             <div className="flex items-center space-x-4">
-//               <Avatar>
-//                 <AvatarFallback>{comment.avatar}</AvatarFallback>
-//               </Avatar>
-//               <div>
-//                 <p className="text-sm font-medium">{comment.author}</p>
-//               </div>
-//             </div>
-//           </CardHeader>
-//           <CardContent>
-//             <p className="text-sm">{comment.content}</p>
-//           </CardContent>
-//         </Card>
-//       ))}
-//       <Card>
-//         <CardHeader>
-//           <h3 className="text-lg font-semibold">Leave a comment</h3>
-//         </CardHeader>
-//         <CardContent>
-//           <Textarea placeholder="Type your comment here." />
-//         </CardContent>
-//         <CardFooter>
-//           <Button>Post Comment</Button>
-//         </CardFooter>
-//       </Card>
-//     </div>
-//   )
-// }
-"use client";
-
-import React from "react";
+import React, { useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { addComment } from "@/actions/reactionAction";
 
-type CommentSectionProps = {
-    postId: string; // The ID of the post
-    comments: {
-        id: string;
-        author: string | null;
-        createdAt:string;
-        content: string;
-    }[]; // Comments passed as props
-};
+interface Comment {
+    id: string;
+    author: string | null;
+    createdAt: string;
+    content: string;
+}
 
-export default function CommentSection({ postId, comments }: CommentSectionProps) {
+interface CommentSectionProps {
+    postId: string;
+    comments: Comment[];
+    onCommentsUpdate: () => void;
+    isLoading?: boolean;
+}
+
+export default function CommentSection({ 
+    postId, 
+    comments, 
+    onCommentsUpdate,
+    isLoading = false 
+}: CommentSectionProps) {
+    const [comment, setComment] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = async () => {
+        if (!comment.trim()) return;
+        
+        try {
+            setIsSubmitting(true);
+            const result = await addComment({ 
+                contentId: postId, 
+                commentBody: comment 
+            });
+            
+            if (result.success) {
+                setComment('');
+                onCommentsUpdate();
+            } else {
+                alert(result.message || "Failed to add comment.");
+            }
+        } catch (error) {
+            alert("Failed to submit comment.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (isLoading) {
+        return <div>Loading comments...</div>;
+    }
+
     return (
         <div className="space-y-4 w-full">
             <h2 className="text-2xl font-bold">Comments</h2>
@@ -71,11 +65,16 @@ export default function CommentSection({ postId, comments }: CommentSectionProps
                     <Card key={comment.id} className="shadow-none">
                         <CardHeader>
                             <div className="flex items-center space-x-4">
-                                {/* <Avatar>
-                                    <AvatarFallback>{comment.avatar}</AvatarFallback>
-                                </Avatar> */}
+                                <Avatar>
+                                    <AvatarFallback>
+                                        {comment.author?.[0]?.toUpperCase() || '?'}
+                                    </AvatarFallback>
+                                </Avatar>
                                 <div>
                                     <p className="text-sm font-medium">{comment.author}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {new Date(comment.createdAt).toLocaleDateString()}
+                                    </p>
                                 </div>
                             </div>
                         </CardHeader>
@@ -85,17 +84,28 @@ export default function CommentSection({ postId, comments }: CommentSectionProps
                     </Card>
                 ))
             ) : (
-                <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
+                <p className="text-muted-foreground">
+                    No comments yet. Be the first to comment!
+                </p>
             )}
             <Card className="shadow-none">
                 <CardHeader>
                     <h3 className="text-lg font-semibold">Leave a comment</h3>
                 </CardHeader>
                 <CardContent>
-                    <Textarea placeholder="Type your comment here." />
+                    <Textarea 
+                        placeholder="Type your comment here." 
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                    />
                 </CardContent>
                 <CardFooter>
-                    <Button>Post Comment</Button>
+                    <Button 
+                        onClick={handleSubmit}
+                        disabled={isSubmitting || !comment.trim()}
+                    >
+                        {isSubmitting ? 'Posting...' : 'Post Comment'}
+                    </Button>
                 </CardFooter>
             </Card>
         </div>

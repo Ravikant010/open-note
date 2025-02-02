@@ -88,8 +88,15 @@ import { getPostStats } from "@/actions/reactionAction";
 import DOMPurify from "dompurify";
 import SanitizedContent from "./_dom";
 import CommentSectionWrapper from "@/components/comment-wraper";
+import { notFound } from "next/navigation";
+import { addComment } from "@/actions/action";
+
 
 export default async function BlogPost({ params }: { params: { id: string } }) {
+  if (!params.id) {
+    notFound();
+  }
+
   // In a real application, you would fetch the post data here
 
   const { id } = params; // Extract the `id` from the URL
@@ -110,6 +117,9 @@ export default async function BlogPost({ params }: { params: { id: string } }) {
   // const relatedPostsPromise = getRelatedPosts(); // Fetch related post/s
   // const [post, relatedPosts] = await Promise.all([postPromise, {}]);
 
+
+  
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 mx-auto w-full">
       {/* Main Content */}
@@ -120,7 +130,7 @@ export default async function BlogPost({ params }: { params: { id: string } }) {
             {/* Post Card */}
             <Card className="overflow-hidden shadow-none w-full rounded-none">
               {/* Title and Publish Date */}
-              <div className=" bg-gray-100 flex flex-col justify-center items-center text-center p-6">
+              <div className="  flex flex-col justify-center items-center text-center p-6">
                 <h1 className="text-4xl font-bold text-gray-800 line-clamp-2">
                   {post.title}
                 </h1>

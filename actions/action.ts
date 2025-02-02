@@ -134,8 +134,13 @@ export async function createNote(args: { title: string; body: string;}) {
 //         "Failed to like note"
 //     );
 // }
-export async function addComment(args: { contentId: string; userId: string; commentBody: string }) {
-    const { contentId, userId, commentBody } = args;
+export async function addComment(args: { contentId: string; userId?: string; commentBody: string }) {
+    let { contentId, commentBody } = args;
+    const userId = (await getSession()).userId;
+    if (!userId) {
+        throw new Error("User not authenticated");
+    }
+   
     return handleAction(
         async () => {
             const commentData = {

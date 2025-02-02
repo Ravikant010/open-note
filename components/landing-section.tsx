@@ -54,47 +54,48 @@ const sections = [
     },
   ];
   
-
-export default function Page() {
-  return (
-    <div className="space-y-10 pt-10">
+  export default function Page() {
+    return (
+      <div className="space-y-10 pt-10 container mx-auto px-4 2xl:px-0 ">
       {sections.map((section, index) => (
         <motion.div
           key={index}
-          initial={{ opacity: 0, y: 50 , scale: 0.9 }}
-          whileInView={{ opacity: 1, y: 0 , width: "90%", scale: 1 ,  }}
+          initial={{ opacity: 0, y: 50, scale: 0.9 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className={`py-20 px-6 md:px-16 ${section.bg} rounded-3xl mx-auto`}
+          className={`py-10 sm:py-16 lg:py-20 px-6 md:px-8 lg:px-12 xl:px-16 ${section.bg} rounded-3xl mx-auto w-full max-w-[1920px] h-[500px] lg:h-[600px]`}
         >
           <div
-            className={`max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16 ${
+            className={`max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8 lg:gap-16 ${
               index % 2 === 0 ? "md:flex-row-reverse" : ""
             }`}
           >
             {/* Left Content */}
-            <div className="text-center md:text-left space-y-6 flex-1 self-center flex justify-center flex-col">
-              <div className="text-orange-500 mx-auto self-center">{section.icon}</div>
-              <h1 className={`font-bold text-4xl ${BrandingSF_Font.className}`}>{section.title}</h1>
-              <p className={`text-lg md:text-xl text-gray-600 font-sans font-medium`}>{section.subtitle}</p>
-              {/* <Button>
-                {section.buttonText} <MoveRight />
-              </Button> */}
+            <div className="text-center md:text-left space-y-6 flex-1 self-center flex justify-center flex-col max-w-2xl">
+              <div className="text-orange-500 md:self-start self-center">{section.icon}</div>
+              <h1 className={`font-bold text-3xl sm:text-4xl lg:text-5xl ${BrandingSF_Font.className}`}>
+                {section.title}
+              </h1>
+              <p className={`text-base sm:text-lg lg:text-xl text-gray-600 font-sans font-medium`}>
+                {section.subtitle}
+              </p>
+              <Button className="self-center md:self-start">
+                {section.buttonText} <MoveRight className="ml-2" />
+              </Button>
             </div>
 
             {/* Right Illustration */}
             {/* <div className="flex-1 mx-auto flex justify-center">
-              <Image
+              <img
                 src={section.illustration}
-                width={450}
-                height={350}
-                alt="Illustration"
-                className="drop-shadow-lg"
+                alt={`${section.title} illustration`}
+                className="drop-shadow-lg w-full max-w-[450px] lg:max-w-[550px] 2xl:max-w-[650px] h-auto object-contain"
               />
             </div> */}
           </div>
         </motion.div>
       ))}
     </div>
-  );
-}
+    );
+  }

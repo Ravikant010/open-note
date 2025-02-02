@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MoveRight, PlusIcon } from "lucide-react";
+import { ChevronDown, MoveRight, PlusIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandingSF_Font, Pacifico_Regular } from "@/lib/font";
 import NavBar from "@/components/nav-bar";
@@ -25,28 +25,28 @@ export function Hero() {
     <motion.div
       initial={{ width: "100%", borderRadius: "0px" }}
       animate={{
-        width: isScrolled ? "90%" : "100%",
-        borderRadius: isScrolled ? "1.5rem" : "0px",
+      width: isScrolled ? "90%" : "100%",
+      borderRadius: isScrolled ? "1.5rem" : "0px",
       }}
       transition={{ duration: 0.1, ease: "backInOut" }}
       className={`bg-white min-h-[80vh] flex items-center justify-center ${BrandingSF_Font.className} mx-auto`}
     >
-      <div className="flex flex-col items-center justify-center text-center px-4 space-y-8 leading-loose text-[1.9rem]">
-        <h1 className="font-bold leading-tight">
-          Craft{" "}
-          <span className={`${Pacifico_Regular.className} text-orange-500`}>
-            Stories, Blogs and Notes
-          </span>
-          <br />
-          <span className="text-blue-0">and, Grow with Your Audience</span>
-        </h1>
-        <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-          Turn feedback into features your users will love. Collect ideas, plan
-          updates, and keep everyone in the loop—all in one simple tool.
-        </p>
-        <Button className="mt-4">
-          Get Started <MoveRight className="ml-2" />
-        </Button>
+      <div className="flex flex-col items-center justify-center text-center px-4 space-y-8 leading-loose text-[1.5rem] md:text-[2.5rem] lg:text-[3rem]">
+      <h1 className="font-bold leading-tight">
+        Craft{" "}
+        <span className={`${Pacifico_Regular.className} text-orange-500`}>
+        Stories, Blogs and Notes
+        </span>
+        <br />
+        <span className="text-blue-0">and, Grow with Your Audience</span>
+      </h1>
+      <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
+        Turn feedback into features your users will love. Collect ideas, plan
+        updates, and keep everyone in the loop—all in one simple tool.
+      </p>
+      <Button className="mt-4">
+        Get Started <MoveRight className="ml-2" />
+      </Button>
       </div>
     </motion.div>
   );
@@ -55,14 +55,14 @@ export function Hero() {
 
 export default function Home() {
   return (
-      <main>
+      <main className="bg-white">
       {/* <NavBar />
       <Hero />
       <Page />
-      <Footer/> */}
-      <PostsPage/>
-{/* <PostsPage /> */}
-      
+      <Footer/>  */}
+      {/* <PostsPage/> */}
+<PostsPage />
+      {/* <OnBoardingPage /> */}
       {/* <DashboardPage /> */}
     </main>
   );
@@ -76,6 +76,8 @@ import React from 'react';
 import PostCard from '@/components/Card';
 import { getUserPosts } from "@/actions/action";
 import { ContentSelect } from "@/db/schema";
+import { Input } from "@/components/ui/input";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 
 export function PostsPage() {
@@ -107,10 +109,119 @@ export function PostsPage() {
   if (!posts) {
     return <p className="text-center text-gray-500">Loading posts...</p>;
   }
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+
+  const filteredPosts = posts.filter((post) => {
+    const matchesSearch =
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = !selectedCategory || post.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
+   const categories = [
+    {
+      id: 1,
+      name: "Technology",
+      slug: "technology",
+      description: "Latest tech news and innovations"
+    },
+    {
+      id: 2,
+      name: "Lifestyle",
+      slug: "lifestyle",
+      description: "Health, wellness and daily living"
+    },
+    {
+      id: 3,
+      name: "Travel",
+      slug: "travel",
+      description: "Destinations, tips and travel guides"
+    },
+    {
+      id: 4,
+      name: "Food & Cooking",
+      slug: "food-cooking",
+      description: "Recipes, cooking tips and food culture"
+    },
+    {
+      id: 5,
+      name: "Business",
+      slug: "business",
+      description: "Business news, entrepreneurship and finance"
+    },
+    {
+      id: 6,
+      name: "Health & Fitness",
+      slug: "health-fitness",
+      description: "Exercise, nutrition and wellness tips"
+    },
+    {
+      id: 7,
+      name: "Entertainment",
+      slug: "entertainment",
+      description: "Movies, music, books and culture"
+    },
+    {
+      id: 8,
+      name: "Education",
+      slug: "education",
+      description: "Learning resources and educational content"
+    },
+    {
+      id: 9,
+      name: "Science",
+      slug: "science",
+      description: "Scientific discoveries and research"
+    },
+    {
+      id: 10,
+      name: "Art & Design",
+      slug: "art-design",
+      description: "Creative arts, design and visual culture"
+    }
+  ]
+  
+   type Category = {
+    id: number
+    name: string
+    slug: string
+    description: string
+  }  
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Latest Posts</h1>
+
+<div className="flex flex-col md:flex-row gap-4 mb-8">
+  <div className="relative flex-1 ">
+    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+    <Input
+      placeholder="Search posts..."
+      className="pl-10"
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+    />
+  </div>
+
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline">
+        {selectedCategory || "All Categories"}
+        <ChevronDown className="ml-2 h-4 w-4" />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      <DropdownMenuItem onClick={() => setSelectedCategory(null)}>All Categories</DropdownMenuItem>
+      {categories.map((category) => (
+        <DropdownMenuItem key={category} onClick={() => setSelectedCategory(category)}>
+          {category}
+        </DropdownMenuItem>
+      ))}
+    </DropdownMenuContent>
+  </DropdownMenu>
+
+  </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {posts.map((post) => (
           <PostCard
@@ -122,7 +233,8 @@ export function PostsPage() {
           />
         ))}
       </div>
-    </div>
+      </div>
+    
   );
 }
 export  function DashboardPage() {
