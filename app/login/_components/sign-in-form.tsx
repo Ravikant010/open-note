@@ -1,16 +1,15 @@
 "use client"
 import { useState } from 'react'
-import { string, z } from 'zod'
+import {z } from 'zod'
 import { ZodError } from 'zod'
-import { Mail, Lock, Github, X } from 'lucide-react'
+import { Mail, Lock, Github } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { motion } from 'framer-motion'
 import { useToast } from '@/hooks/use-toast'
-import { ToastAction } from "@/components/ui/toast"
-import { getUserByEmail } from '@/actions/action'
+
 import { useRouter } from 'next/navigation'
 
 const signInSchema = z.object({

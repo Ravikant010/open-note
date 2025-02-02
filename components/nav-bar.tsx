@@ -1,6 +1,6 @@
 "use client";
 
-import { Cross, Logs, Menu, X } from "lucide-react";
+import {Menu, X} from "lucide-react";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 import { BrandingSF_Font, Pacifico_Regular } from "@/lib/font";

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+// import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { MoveRight, PenTool, FileText, Users, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { BrandingSF_Font, Pacifico_Regular } from "@/lib/font";
+// import Image from "next/image";
+import { BrandingSF_Font } from "@/lib/font";
+import Link from "next/link";
 const sections = [
     {
       title: "Write & Organize Effortlessly",
@@ -80,9 +81,13 @@ const sections = [
               <p className={`text-base sm:text-lg lg:text-xl text-gray-600 font-sans font-medium`}>
                 {section.subtitle}
               </p>
+          
               <Button className="self-center md:self-start">
+          
                 {section.buttonText} <MoveRight className="ml-2" />
+                
               </Button>
+          
             </div>
 
             {/* Right Illustration */}

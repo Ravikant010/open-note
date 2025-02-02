@@ -1,9 +1,10 @@
 import { Heart, MessageCircle, Share2 } from "lucide-react"; 
 import React, { useEffect, useState } from "react";
 import { CardContent, Card } from "./ui/card";
+
 import Link from "next/link";
 import DOMPurify from 'dompurify';
-import { likeContent } from "@/actions/reactionAction";
+import { getCategoriesByPostId, likeContent } from "@/actions/reactionAction";
 type PostCardProps = {
   id: string;
   title: string;
@@ -17,6 +18,21 @@ export default function PostCard({
   const sanitizeHTML = (dirty: string) => ({
     __html: DOMPurify.sanitize(dirty)
 });
+const [category, setCategory] = useState<{ id: string; name: string; createdAt: Date; updatedAt: Date; }[] | undefined>([])
+useEffect(()=>{
+    async function callCategory() {
+        setCategoryLoading(true);
+       const cat = await getCategoriesByPostId(id);
+       console.log(cat)
+       setCategory(cat.data || []);
+       setCategoryLoading(false);
+    }
+    callCategory();
+}, [id])
+
+const [categoryLoading, setCategoryLoading] = useState(true);
+
+
   return (
     <div>
       
@@ -35,6 +51,9 @@ export default function PostCard({
           )} */}
           <CardContent className="p-4 h-28">
             <h3 className="font-semibold mb-2 line-clamp-2">{title}</h3>
+            {categoryLoading  ? "..." :
+            category && category.length > 0 && <Badge variant={"outline"}>{category[0].name}</Badge>}
+
             <p  
     className="text-sm text-muted-foreground line-clamp-3"
     dangerouslySetInnerHTML={sanitizeHTML(preview)}
@@ -55,7 +74,8 @@ type PostFooterProps = {
   postId: string;
 };
 import { Button } from '@/components/ui/button'; 
-import { addComment, shareContent, getPostStats } from '@/actions/reactionAction'; 
+import { addComment, shareContent,getPostStats } from '@/actions/reactionAction'; 
+import { Badge } from "./ui/badge";
 const PostFooter: React.FC<PostFooterProps> = ({ postId }) => {
     const [likes, setLikes] = useState(0);
     const [comments, setComments] = useState(0);

@@ -1,18 +1,20 @@
 "use client";
 import { useState } from "react";
 import { z } from "zod";
-import { User, Mail, Lock, X } from "lucide-react";
+import { User, Mail, Lock, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@radix-ui/react-toast";
-import { createUser } from "@/actions/action";
+
+import { useRouter } from "next/navigation";
+import { createUser } from "@/actions/userAction";
 const MotionButton = motion(Button);
 const MotionCheckbox = motion(Checkbox);
 const MotionInput = motion(Input);
+
 const signUpSchema = z
   .object({
     name: z.string().min(2),
@@ -44,14 +46,17 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 export function SignUpForm() {
+  const router= useRouter()
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [terms, setTerms] = useState(false);
   const { toast } = useToast();
+  const [isLogging, setIsLogging] = useState<boolean>(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLogging(true)
     try {
       const validatedData = signUpSchema.parse({
         name,
@@ -67,7 +72,9 @@ export function SignUpForm() {
         description: "Your account has been created successfully.",
         variant: "default",
       });
+      router.push("/")
     } catch (error) {
+      setIsLogging(false)
       console.error("Error during sign-up:", error);
       if (error instanceof z.ZodError) {
         error.errors.forEach((err) => {
@@ -175,7 +182,7 @@ export function SignUpForm() {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        Sign Up
+        {isLogging ?  <Loader2 className="animate-spin" /> : "Sign Up"}
       </MotionButton>
     </motion.form>
   );

@@ -40,6 +40,7 @@ function generateFallbackSecret() {
   
   // Helper to check if user is logged in
   export async function isLoggedIn() {
-    const session = await getSession();
+    const session = await getSession(); 
+    
     return !!session.userId;
   }

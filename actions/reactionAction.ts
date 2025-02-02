@@ -1,9 +1,9 @@
 'use server';
 
 import { db } from '@/db/db';
-import { comments, content, likes, contentCategories, categories } from '@/db/schema';
+import { comments, content, likes, contentCategories, categories, users } from '@/db/schema';
 import { getSession } from '@/lib/session';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 
 /**
  * Like a piece of content.
@@ -183,6 +183,26 @@ export async function getContentCategories(args: { contentId: string }) {
         return { success: false, message: "Failed to fetch content categories." };
     }
 }
+export async function getCategoriesByPostId(postId: string) {
+    try {
+      // Query the join table (contentCategories) to find category IDs linked to the post
+      const categoryRelations = await db.query.contentCategories.findMany({
+        where: eq(contentCategories.contentId, postId),
+        with: {
+          category: true, // Include the related category details
+        },
+      });
+  
+      // Extract the category names or other details
+      const categoriesList = categoryRelations.map((relation) => relation.category);
+  
+      return { success: true, data: categoriesList };
+    } catch (error) {
+      console.error("Error fetching categories by post ID:", error);
+      return { success: false, message: "Failed to fetch categories." };
+    }
+  }
+
 
 export async function getPostStats(postId: string) {
     try {
@@ -249,3 +269,43 @@ export async function getCommentsByPostId(postId: string) {
         return { success: false, message: "Failed to fetch comments." };
     }
 }
+
+export async function getPostStats_profile() {
+    try {
+      // Get the session and extract the userId
+      const session = await getSession();
+      if (!session || !session.userId) {
+        throw new Error('User not authenticated');
+      }
+  
+      const userId = session.userId;
+  
+      // Query the database for stats
+      const result = await db
+        .select({
+          posts: sql<number>`COUNT(${content.id})`.mapWith(Number),
+          likes: sql<number>`COUNT(${likes.id})`.mapWith(Number),
+          comments: sql<number>`COUNT(${comments.id})`.mapWith(Number),
+        })
+        .from(users)
+        .leftJoin(content, eq(content.userId, users.id)) // Join content created by the user
+        .leftJoin(likes, eq(likes.contentId, content.id)) // Join likes on the content
+        .leftJoin(comments, eq(comments.contentId, content.id)) // Join comments on the content
+        .where(eq(users.id, userId)) // Filter by the authenticated user ID
+        .groupBy(users.id); // Group by user to aggregate results
+  
+      if (result.length === 0) {
+        return { success: true, posts: 0, likes: 0, comments: 0 };
+      }
+  
+      return {
+        success: true,
+        posts: result[0].posts,
+        likes: result[0].likes,
+        comments: result[0].comments,
+      };
+    } catch (error) {
+      console.error('Error fetching post stats:', error);
+      return { success: false, error: 'Failed to fetch stats' };
+    }
+  }

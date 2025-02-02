@@ -76,49 +76,40 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { ThumbsUp, MessageSquare, Share2, Bookmark } from "lucide-react";
+
 import AuthorCard from "@/components/AuthorCard";
-import CommentSection from "@/components/CommentSection";
+
 import { getPostById } from "@/actions/noteActions";
 import { ContentSelect } from "@/db/schema";
 import { getPostStats } from "@/actions/reactionAction";
-import DOMPurify from "dompurify";
-import SanitizedContent from "./_dom";
+
+import SanitizedContent from "./_component/_dom";
 import CommentSectionWrapper from "@/components/comment-wraper";
 import { notFound } from "next/navigation";
-import { addComment } from "@/actions/action";
 
+interface PageProps {
+  params: {
+    id: string; // The dynamic ID parameter
+  };
+}
 
-export default async function BlogPost({ params }: { params: { id: string } }) {
-  if (!params.id) {
-    notFound();
-  }
+export default async function PostPage({ params }:{params: Promise<{id:string}>}) {
+  const id = (await params).id
 
-  // In a real application, you would fetch the post data here
+  try {
+    // Fetch the post and stats in parallel
+    const [postResponse, statsResponse] = await Promise.all([
+      getPostById(id), // Fetch the post by ID
+      getPostStats(id), // Fetch stats for the post
+    ]);
 
-  const { id } = params; // Extract the `id` from the URL
-  const [postResponse, statsResponse] = await Promise.all([
-    getPostById(id),
-    getPostStats(id),
-  ]);
+    // Validate the post response
+    if (!postResponse.success || !postResponse.post) {
+      notFound(); // Show a 404 page if the post doesn't exist
+    }
 
-  // Fetch the blog post by ID
-  if (!postResponse.success) {
-    throw new Error(postResponse.message || "Failed to fetch post");
-  }
-  if (!postResponse.post) {
-    throw new Error("Post not found");
-  }
-  const post: ContentSelect = postResponse.post;
-  const stats = statsResponse;
-  // const relatedPostsPromise = getRelatedPosts(); // Fetch related post/s
-  // const [post, relatedPosts] = await Promise.all([postPromise, {}]);
-
-
-  
+    const post: ContentSelect = postResponse.post;
+    const stats = statsResponse;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 mx-auto w-full">
@@ -195,10 +186,15 @@ export default async function BlogPost({ params }: { params: { id: string } }) {
             &copy; {new Date().getFullYear()} Open Note. All rights reserved.
           </p>
           <p className="mt-2 text-sm text-gray-400">
-            Empowering the future through AI knowledge and insights.
+            Empowering the future through  knowledge and insights.
           </p>
         </div>
       </footer>
     </div>
   );
+}
+catch (error) {
+  console.error('Error fetching post:', error);
+  throw new Error('Failed to load post');
+}
 }

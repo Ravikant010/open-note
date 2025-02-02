@@ -10,7 +10,7 @@ import Section from "@/components/landing-section";
 import Page from "@/components/landing-section";
 import Footer from "@/components/footer";
 
-export function Hero() {
+ function Hero() {
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -25,203 +25,221 @@ export function Hero() {
     <motion.div
       initial={{ width: "100%", borderRadius: "0px" }}
       animate={{
-      width: isScrolled ? "90%" : "100%",
-      borderRadius: isScrolled ? "1.5rem" : "0px",
+        width: isScrolled ? "90%" : "100%",
+        borderRadius: isScrolled ? "1.5rem" : "0px",
       }}
       transition={{ duration: 0.1, ease: "backInOut" }}
       className={`bg-white min-h-[80vh] flex items-center justify-center ${BrandingSF_Font.className} mx-auto`}
     >
       <div className="flex flex-col items-center justify-center text-center px-4 space-y-8 leading-loose text-[1.5rem] md:text-[2.5rem] lg:text-[3rem]">
-      <h1 className="font-bold leading-tight">
-        Craft{" "}
-        <span className={`${Pacifico_Regular.className} text-orange-500`}>
-        Stories, Blogs and Notes
-        </span>
-        <br />
-        <span className="text-blue-0">and, Grow with Your Audience</span>
-      </h1>
-      <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
-        Turn feedback into features your users will love. Collect ideas, plan
-        updates, and keep everyone in the loop—all in one simple tool.
-      </p>
-      <Button className="mt-4">
-        Get Started <MoveRight className="ml-2" />
-      </Button>
+        <h1 className="font-bold leading-tight">
+          Craft{" "}
+          <span className={`${Pacifico_Regular.className} text-orange-500`}>
+            Stories, Blogs and Notes
+          </span>
+          <br />
+          <span className="text-blue-0">and, Grow with Your Audience</span>
+        </h1>
+        <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
+          Turn feedback into features your users will love. Collect ideas, plan
+          updates, and keep everyone in the loop—all in one simple tool.
+        </p>
+        <Link href="/login">
+          <Button className="mt-4">
+            Get Started <MoveRight className="ml-2" />
+          </Button>
+        </Link>
       </div>
     </motion.div>
   );
 }
 
-
 export default function Home() {
-  return (
+  const [userPosts, setUserPosts] = useState<ContentSelect[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false); // Track login status
+
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        // Check if the user is logged in
+        const loggedIn = await isLoggedIn();
+        console.log(loggedIn)
+        setIsUserLoggedIn(loggedIn);
+
+        if (loggedIn) {
+          // Fetch user posts if logged in
+          const { success, data } = await getUserPosts();
+          if (success) {
+            if (data) {
+              setUserPosts([...data]);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error during initialization:", error);
+      } finally {
+        setLoading(false); // Ensure loading state is updated regardless of success or failure
+      }
+    };
+
+    initialize();
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // If still loading, show a loading indicator
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  // If the user is not logged in, show the public view
+  if (!isUserLoggedIn) {
+    return (
       <main className="bg-white">
-      {/* <NavBar />
-      <Hero />
-      <Page />
-      <Footer/>  */}
-      {/* <PostsPage/> */}
-<PostsPage />
-      {/* <OnBoardingPage /> */}
-      {/* <DashboardPage /> */}
-    </main>
+        <NavBar />
+        <Hero />
+        {/* <Page /> */}
+        <Footer />
+      </main>
+    );
+  }
+  if (isUserLoggedIn && !userPosts.length)
+    return (
+      <main className="bg-white">
+        <OnBoardingPage />
+      </main>
+    );
+  // If logged in and posts are fetched, display them in a grid
+  return (
+    <SidebarProvider >
+ 
+    {/* Sidebar */}
+    <Sidebar />
+ 
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-auto">
+  
+        <div className="container mx-auto py-6 px-4">
+        <SidebarTrigger className="bg-transparent" />
+          <PostsPage />
+        </div>
+      </div>
+
+  </SidebarProvider>
+
   );
 }
 
-
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import OnBoardingPage, { OnBoarding } from "@/components/on-baording";
-import React from 'react';
-import PostCard from '@/components/Card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import OnBoardingPage, { OnBoarding } from "@/components/on-baording";
+import React from "react";
+import PostCard from "@/components/Card";
 import { getUserPosts } from "@/actions/action";
 import { ContentSelect } from "@/db/schema";
 import { Input } from "@/components/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Link from "next/link";
+import { isLoggedIn } from "@/lib/session";
+import OnBoardingPage, { OnBoarding } from "@/components/on-baording";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Sidebar } from "@/components/Nav-sidebar";
 
-
-export function PostsPage() {
+ function PostsPage() {
   const [posts, setPosts] = useState<ContentSelect[] | []>([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const { success, data } = await getUserPosts();
-        console.log(data)
+        console.log(data);
         if (success && data) {
           setPosts(data);
         } else {
-          setError('Failed to load posts.');
+          setError("Failed to load posts.");
         }
       } catch (err) {
-        setError('Failed to fetch posts. Please try again later.');
+        setError("Failed to fetch posts. Please try again later.");
       }
     };
 
     fetchPosts();
   }, []);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   if (error) {
     return <p className="text-center text-red-500">{error}</p>;
   }
 
-  if (!posts) {
+  if (!posts.length) {
     return <p className="text-center text-gray-500">Loading posts...</p>;
   }
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
-  const filteredPosts = posts.filter((post) => {
-    const matchesSearch =
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = !selectedCategory || post.category === selectedCategory
-    return matchesSearch && matchesCategory
-  })
-   const categories = [
-    {
-      id: 1,
-      name: "Technology",
-      slug: "technology",
-      description: "Latest tech news and innovations"
-    },
-    {
-      id: 2,
-      name: "Lifestyle",
-      slug: "lifestyle",
-      description: "Health, wellness and daily living"
-    },
-    {
-      id: 3,
-      name: "Travel",
-      slug: "travel",
-      description: "Destinations, tips and travel guides"
-    },
-    {
-      id: 4,
-      name: "Food & Cooking",
-      slug: "food-cooking",
-      description: "Recipes, cooking tips and food culture"
-    },
-    {
-      id: 5,
-      name: "Business",
-      slug: "business",
-      description: "Business news, entrepreneurship and finance"
-    },
-    {
-      id: 6,
-      name: "Health & Fitness",
-      slug: "health-fitness",
-      description: "Exercise, nutrition and wellness tips"
-    },
-    {
-      id: 7,
-      name: "Entertainment",
-      slug: "entertainment",
-      description: "Movies, music, books and culture"
-    },
-    {
-      id: 8,
-      name: "Education",
-      slug: "education",
-      description: "Learning resources and educational content"
-    },
-    {
-      id: 9,
-      name: "Science",
-      slug: "science",
-      description: "Scientific discoveries and research"
-    },
-    {
-      id: 10,
-      name: "Art & Design",
-      slug: "art-design",
-      description: "Creative arts, design and visual culture"
-    }
-  ]
-  
-   type Category = {
-    id: number
-    name: string
-    slug: string
-    description: string
-  }  
+  // const filteredPosts = posts.filter((post) => {
+  //   const matchesSearch =
+  //     post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     post.description.toLowerCase().includes(searchQuery.toLowerCase())
+  //   const matchesCategory = !selectedCategory || post.category === selectedCategory
+  //   return matchesSearch && matchesCategory
+  // })
+
+  const categories = {
+    TECHNOLOGY: "Technology",
+    AI: "Artificial Intelligence",
+    BUSINESS: "Business",
+    HEALTH: "Health & Wellness",
+    EDUCATION: "Education",
+    LIFESTYLE: "Lifestyle",
+    TRAVEL: "Travel",
+    FOOD: "Food & Cooking",
+    SPORTS: "Sports",
+    OTHER: "Other",
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Latest Posts</h1>
+      {/* <h1 className="text-3xl font-bold mb-8"></h1> */}
 
-<div className="flex flex-col md:flex-row gap-4 mb-8">
-  <div className="relative flex-1 ">
-    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-    <Input
-      placeholder="Search posts..."
-      className="pl-10"
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-    />
-  </div>
+      <div className="flex flex-col md:flex-row gap-4 mb-8">
+        <div className="relative flex-1 ">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search posts..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="outline">
-        {selectedCategory || "All Categories"}
-        <ChevronDown className="ml-2 h-4 w-4" />
-      </Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent>
-      <DropdownMenuItem onClick={() => setSelectedCategory(null)}>All Categories</DropdownMenuItem>
-      {categories.map((category) => (
-        <DropdownMenuItem key={category} onClick={() => setSelectedCategory(category)}>
-          {category}
-        </DropdownMenuItem>
-      ))}
-    </DropdownMenuContent>
-  </DropdownMenu>
-
-  </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">
+              {selectedCategory || "All Categories"}
+              <ChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => setSelectedCategory(null)}>
+              All Categories
+            </DropdownMenuItem>
+            {Object.keys(categories).map((category: string) => (
+              <DropdownMenuItem
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {posts.map((post) => (
           <PostCard
@@ -229,15 +247,13 @@ export function PostsPage() {
             id={post.id}
             title={post.title}
             preview={post.body}
-         
           />
         ))}
       </div>
-      </div>
-    
+    </div>
   );
 }
-export  function DashboardPage() {
+ function DashboardPage() {
   return (
     <div className="min-h-screen bg-muted/40 p-6">
       {/* Header Section */}
@@ -346,5 +362,5 @@ export  function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

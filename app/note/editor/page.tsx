@@ -44,7 +44,44 @@ import Mention from "@tiptap/extension-mention";
 import { FontSize } from "tiptap-extension-font-size";
 import { common, createLowlight } from "lowlight";
 import "highlight.js/styles/github.css";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
+
+// <Card className="w-full max-w-4xl mx-auto">
+// <CardHeader>
+//   <CardTitle>Create New Post</CardTitle>
+// </CardHeader>
+// <CardContent className="space-y-4">
+//   {/* Title Input */}
+//   <div>
+//     <input
+//       type="text"
+//       placeholder="Post Title"
+//       value={title}
+//       onChange={(e) => setTitle(e.target.value)}
+//       className="w-full p-2 border rounded-md"
+//     />
+//   </div>
+
+//   {/* Category Selection */}
+//   <div>
+//     <Select value={category} onValueChange={setCategory}>
+//       <SelectTrigger className="w-full">
+//         <SelectValue placeholder="Select a category" />
+//       </SelectTrigger>
+//       <SelectContent>
+//         {categories.map((cat) => (
+//           <SelectItem key={cat} value={cat}>
+//             {cat}
+//           </SelectItem>
+//         ))}
+//       </SelectContent>
+//     </Select>
+//   </div>
+
+
+
+
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BoldIcon,
   ItalicIcon,
@@ -76,9 +113,9 @@ import {
   RotateCw,
   Minus,
   CheckSquare,
-  Palette,
-  LetterText,
-  AArrowUp,
+  Edit,
+  ChevronDown,
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -90,9 +127,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { createNote } from "@/actions/action";
 import { useRouter } from "next/navigation";
 import { getSession } from "@/lib/session";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Category } from "@/db/schema";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { createNote } from "@/actions/noteActions";
 const lowlight = createLowlight(common);
 interface ButtonGroupProps {
   children: React.ReactNode;
@@ -134,6 +174,23 @@ const TextEditor = () => {
   const [textColor, setTextColor] = useState("#000000");
   const [highlightColor, setHighlightColor] = useState("#ffff00");
   const [documentTitle, setDocumentTitle] = useState("Write Title Here");
+  const categories = [
+    "Technology",
+    "Artificial Intelligence",
+    "Business",
+    "Health & Wellness",
+    "Education",
+    "Lifestyle",
+    "Travel",
+    "Food & Cooking",
+    "Sports",
+    "Other",
+  ];
+
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+
+
+  const router =  useRouter()
   const editor = useEditor({
     extensions: [
       Document,
@@ -265,6 +322,8 @@ const TextEditor = () => {
         .run();
     }
   }, [editor]);
+
+  const [posting, setPosting] = useState<boolean>(false);
   const handleTitleChange = (e:any) => {
     setDocumentTitle(e.target.value);
   };
@@ -272,48 +331,32 @@ const TextEditor = () => {
     if (!documentTitle.trim()) setDocumentTitle("Untitled Document");
   };
   if (!editor) return null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPosting(true);
     try {
-      await createNote({ title: documentTitle, body: editor.getHTML() });
-      useRouter().push('/notes');
+    await createNote({
+        title: documentTitle,
+        body: editor.getHTML(),
+        type: 'post',
+        categoryName:selectedCategory || "Other"
+      }
+      );
+  
+      router.push('/');
     } catch (error) {
+      console.error("Failed to create note:", error);
+    } finally {
+      setPosting(false);
     }
   };
   return (
     <div className="min-h-screen bg-gray-100 p-4">
-      <Card className="max-w-[850px] mx-auto shadow-sm">
+      <Card className=" mx-auto shadow-sm">
         <CardHeader className="space-y-1  border-b  p-0">
-        <div className="px-4 pt-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1 flex-1">
-            </div>
-            <Button      variant="outline"
-              size="sm" className="w-20 mx-4 px-10" onClick={async(e)=>{
-                console.log(editor.getHTML())
-             await   handleSubmit(e)
-              }}>
-                Post
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2 bg-white hover:bg-gray-50 border-gray-200 w-20 px-10"
-              onClick={() => setIsPreview(!isPreview)}
-            >
-              {isPreview ? (
-                <>
-                  <Edit2 className="h-4 w-4 text-gray-600" />
-                  <span className="text-gray-700">Edit</span>
-                </>
-              ) : (
-                <>
-                  <Eye className="h-4 w-4 text-gray-600" />
-                  <span className="text-gray-700">Preview</span>
-                </>
-              )}
-            </Button>
-          </div>
+        <div className="px-4 pt-4 flex flex-col ">
+        
           {!isPreview && (
             <div className="flex flex-wrap items-center gap-2 p-2 bg-white border-b">
               {/* Text Formatting */}
@@ -637,6 +680,54 @@ const TextEditor = () => {
                   <RotateCw className="h-4 w-4" />
                 </FormatButton>
               </ButtonGroup>
+              <div className="flex items-center justify-between">
+            <div className="space-y-1 flex-1">
+            </div>
+           <Button      variant="default"
+              size="sm" className="w-20 mx-4 px-10" onClick={async(e)=>{
+                console.log(editor.getHTML())
+             await   handleSubmit(e)
+              }}>
+                {posting ? 'Posting...' : 'Post'}
+            </Button>
+            <Button
+             variant={"outline"}
+              size="sm"
+              className="gap-2 bg-white hover:bg-gray-50 border-gray-200 w-20 px-10"
+              onClick={() => setIsPreview(!isPreview)}
+            >
+              {isPreview ? (
+                <>
+                  <Edit2 className="h-4 w-4 text-gray-600" />
+                  <span className="text-gray-700">Edit</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4 text-gray-600" />
+                  <span className="text-gray-700">Preview</span>
+                </>
+              )}
+            </Button> 
+          </div>
+
+          
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline">
+        {selectedCategory || "All Categories"}
+        <ChevronDown className="ml-2 h-4 w-4" />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      <DropdownMenuItem onClick={() => setSelectedCategory(null)}>All Categories</DropdownMenuItem>
+      {Object.values(categories).map((category:string) => (
+        <DropdownMenuItem key={category} onClick={() => setSelectedCategory(category)}>
+          {category}
+        </DropdownMenuItem>
+      ))}
+    </DropdownMenuContent>
+  </DropdownMenu>
+
             </div>
           )}
             <Input
@@ -655,7 +746,7 @@ const TextEditor = () => {
           <div className="bg-white">
             <EditorContent
               editor={editor}
-              className="max-w-[850px] mx-auto px-12 py-8 h-[calc(100vh-250px)] focus:outline-none overflow-scroll"
+              className=" mx-auto px-12 py-8 h-[calc(100vh-250px)] focus:outline-none overflow-scroll"
             />
           </div>
         </CardContent>
@@ -821,9 +912,10 @@ const TextEditor = () => {
   );
 };
 export default function Home() {
+
   return (
     <main>
-      <TextEditor />
+    <TextEditor />
     </main>
   );
 }

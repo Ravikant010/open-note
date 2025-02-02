@@ -1,7 +1,7 @@
 'use server';
 import { db } from '@/db/db';
 import { comments, users } from '@/db/schema';
-import { UserInsert } from '@/db/infer';
+
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 export async function handleAction<T>(
@@ -24,21 +24,7 @@ export async function handleAction<T>(
         };
     }
 }
-export async function createUser(UserInsert: UserInsert) {
-    try {
-        const hashedPassword = await bcrypt.hash(UserInsert.password, 10);
-        UserInsert.password = hashedPassword
-        const [result] = await db!.insert(users).values(UserInsert).returning();
-        const session = getSession()
-            ;
-        (await session).userId = result.id;
-        (await session).save()
-        return { success: true, user: result };
-    } catch (error) {
-        console.log(error)
-        return { success: false, error: "Failed to create user" };
-    }
-}
+
 export async function getUsers() {
     try {
         const result = await db.select().from(users);

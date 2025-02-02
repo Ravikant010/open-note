@@ -6,10 +6,24 @@ import { ChevronDown, Plus } from "lucide-react"
 
 
 import { Sidebar } from "@/components/Nav-sidebar"
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { BrandingSF_Font, Pacifico_Regular } from "@/lib/font"
-export default function OnBoardingPage() {
-    return (
+import { getCurrentUser } from "@/actions/userAction"
+import React from "react"
+import { UserSelect } from "@/db/schema"
+import Link from "next/link"
+export default  function OnBoardingPage() {
+  const [user, setUser] = React.useState<UserSelect | null>(null);
+
+  React.useEffect(() => {
+    async function fetchUser() {
+      const userData = await getCurrentUser();
+      //@ts-ignore
+      setUser(userData.data);
+    }
+    fetchUser();
+  }, []);
+    return (  
       <SidebarProvider className="bg-transparent mx-auto">
         <div className={` ${BrandingSF_Font.className}  flex min-h-screen mx-auto text-gray-900`}>
           {/* Sidebar */}
@@ -26,7 +40,8 @@ export default function OnBoardingPage() {
               <div className="mx-auto max-w-6xl min-w-[300px] md:min-w-[500px] lg:min-w-[700px]">
                 {/* Header */}
                 <div className={`${BrandingSF_Font.className} mb-8`}>
-                    <h1 className="text-3xl font-bold mb-2">Hi Ravikant</h1>
+                    <h1 className="text-3xl font-bold mb-2">Hi {user?.name}</h1>
+          
                   <h1 className="text-3xl font-bold mb-2">Welcome to <span className={`${Pacifico_Regular.className} text-orange-500`}>Open Note! </span></h1>
                   <p className="text-muted-foreground">Get started with content creation, planning, and discovery</p>
                 </div>
@@ -38,44 +53,52 @@ export default function OnBoardingPage() {
                     {/* Content Creation */}
                     <Card className="min-w-[200px]">
                       <CardHeader>
-                        <CardTitle>Create & Share Content</CardTitle>
+                      <CardTitle>Create & Share Content</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <p className="text-sm text-muted-foreground">
-                          Start writing with our AI-powered editor and share your stories with the community.
-                        </p>
+                      <p className="text-sm text-muted-foreground">
+                        Start writing with our AI-powered editor and share your stories with the community.
+                      </p>
+                      <Link href="/note/editor">
                         <Button className="w-full">Get Started</Button>
+                      </Link>
                       </CardContent>
                     </Card>
   
                     {/* Planning Tools */}
                     <Card className="min-w-[200px]">
                       <CardHeader>
-                        <CardTitle>Planning Tools</CardTitle>
+                      <CardTitle>
+                        Planning Tools
+                        <span className="ml-2 text-xs text-gray-500 bg-gray-200 rounded-full px-2 py-1">Coming Soon</span>
+                      </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <p className="text-sm text-muted-foreground">
-                          Organize your content calendar and schedule posts effectively.
-                        </p>
-                        <Button className="w-full">Get Started</Button>
+                      <p className="text-sm text-muted-foreground">
+                        Organize your content calendar and schedule posts effectively.
+                      </p>
+                      <Button className="w-full" disabled>Get Started</Button>
                       </CardContent>
                     </Card>
-  
+            
                     {/* Discovery */}
                     <Card className="min-w-[200px]">
                       <CardHeader>
-                        <CardTitle>Discover Content</CardTitle>
+                      <CardTitle>
+                        Discover Content
+                        <span className="ml-2 text-xs text-gray-500 bg-gray-200 rounded-full px-2 py-1">Coming Soon</span>
+                      </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <p className="text-sm text-muted-foreground">
-                          Explore trending topics and connect with writers who share your interests.
-                        </p>
-                        <Button className="w-full">Get Started</Button>
+                      <p className="text-sm text-muted-foreground">
+                        Explore trending topics and connect with writers who share your interests.
+                      </p>
+                      <Button className="w-full" disabled>Get Started</Button>
                       </CardContent>
                     </Card>
                   </div>
   
-                  {/* Featured Content Section */}
+                  {/* Featured Content Section
                   <div className="mt-12">
                     <h2 className="text-2xl font-semibold mb-6">Featured Content</h2>
                     <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
@@ -90,8 +113,9 @@ export default function OnBoardingPage() {
                           </CardContent>
                         </Card>
                       ))}
-                    </div>
-                  </div>
+                    </div> */}
+
+                  {/* </div> */}
                 </div>
               </div>
             </div>
