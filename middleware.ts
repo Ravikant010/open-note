@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes (no authentication required)
-  const publicRoutes = ['/login', '/signup', '/profile'];
+  const publicRoutes = ['/login', '/signup', '/profile', "/"];
 
   // Check if the current route matches a dynamic public route
   const isPublicPostRoute = pathname.startsWith('/post/'); // Matches /post/:id
