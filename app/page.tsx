@@ -148,6 +148,7 @@ import { isLoggedIn } from "@/lib/session";
 import OnBoardingPage, { OnBoarding } from "@/components/on-baording";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Sidebar } from "@/components/Nav-sidebar";
+import { fetchAllPosts, getLatestPosts } from "@/actions/noteActions";
 
  function PostsPage() {
   const [posts, setPosts] = useState<ContentSelect[] | []>([]);
@@ -156,7 +157,8 @@ import { Sidebar } from "@/components/Nav-sidebar";
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { success, data } = await getUserPosts();
+        const { success, posts:data } = await fetchAllPosts();
+ 
         console.log(data);
         if (success && data) {
           setPosts(data);

@@ -1,9 +1,9 @@
 'use server';
 
 import { db } from '@/db/db';
-import { Category, content, users, categories, contentCategories } from '@/db/schema';
+import { Category, content, users, categories, contentCategories, likes } from '@/db/schema';
 import { getSession } from '@/lib/session';
-import { eq } from 'drizzle-orm';
+import { desc, eq, sql } from 'drizzle-orm';
 import { unstable_cache } from 'next/cache';
 
 
@@ -145,3 +145,76 @@ export async function getPostById(id: string) {
       return { success: false, message: "Failed to fetch post." };
     }
   }
+
+
+type Post = {
+  id: string;
+  title: string;
+  body: string;
+  createdAt: Date;
+  likeCount?: number; // Optional field for trending posts
+};
+
+// Fetch latest posts
+export async function getLatestPosts(limit: number = 10): Promise<Post[]> {
+  try {
+    const posts = await db
+      .select({
+        id: content.id,
+        title: content.title,
+        body: content.body,
+        createdAt: content.createdAt,
+      })
+      .from(content)
+      .orderBy(desc(content.createdAt)) // Sort by creation date in descending order
+      .limit(limit);
+
+    return posts;
+  } catch (error) {
+    console.error('Error fetching latest posts:', error);
+    throw new Error('Failed to fetch latest posts');
+  }
+}
+
+// Fetch trending posts (based on like count)
+export async function getTrendingPosts(limit: number = 10): Promise<Post[]> {
+  try {
+    const posts = await db
+      .select({
+        id: content.id,
+        title: content.title,
+        body: content.body,
+        createdAt: content.createdAt,
+        likeCount: sql<number>`COUNT(${likes.id})`.mapWith(Number), // Count the number of likes
+      })
+      .from(content)
+      .leftJoin(likes, eq(likes.contentId, content.id)) // Join with likes table
+      .groupBy(content.id) // Group by post ID to aggregate likes
+      .orderBy(desc(sql<number>`COUNT(${likes.id})`)) // Sort by like count in descending order
+      .limit(limit);
+
+    return posts;
+  } catch (error) {
+    console.error('Error fetching trending posts:', error);
+    throw new Error('Failed to fetch trending posts');
+  }
+}
+
+export async function fetchAllPosts(): Promise<{ success: boolean; posts?: Post[]; error?: string }> {
+  try {
+    const posts = await db
+      .select({
+        id: content.id,
+        title: content.title,
+        body: content.body,
+        createdAt: content.createdAt,
+      })
+      .from(content)
+      .orderBy(content.createdAt); // Optional: Sort by creation date
+
+    return { success: true, posts };
+  } catch (error) {
+    console.error('Error fetching all posts:', error);
+    return { success: false, error: 'Failed to fetch posts' };
+  }
+}

@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { deletePost, deleteAccount } from '@/actions/setting';
 import { useRouter } from 'next/navigation';
+import { destroySession, getSession } from '@/lib/session';
 
 export default function SettingsPage() {
   const [postId, setPostId] = useState<string>('');
@@ -62,6 +63,26 @@ export default function SettingsPage() {
       setAccountDeletionMessage('An unexpected error occurred');
     } finally {
       setIsDeletingAccount(false);
+    }
+  };
+
+  const [logoutMessage, setLogoutMessage] = useState<string | null>(null);
+
+  // Handle logout
+  const handleLogout = async () => {
+    setLogoutMessage('Logging out...');
+    try {
+      await destroySession();
+      const session = await getSession();
+
+      if (!session) {
+       return router.push('/login');
+      } else {
+        setLogoutMessage('Failed to log out');
+      }
+    } catch (error) {
+      console.log(error)
+      setLogoutMessage('An unexpected error occurred');
     }
   };
 
@@ -135,6 +156,7 @@ export default function SettingsPage() {
             </Alert>
           )}
         </CardContent>
+        
       </Card>
 
       {/* Future Settings */}
@@ -146,6 +168,16 @@ export default function SettingsPage() {
           </CardDescription>
         </CardHeader>
       </Card>
+      <Button onClick={async () => {
+          setLogoutMessage(null);
+          await handleLogout();
+        }} 
+        variant="destructive" 
+        className='w-full'
+        disabled={logoutMessage === 'Logging out...'}
+      >
+        {logoutMessage === 'Logging out...' ? 'Logging out...' : 'Logout'}
+      </Button>
     </div>
   );
 }

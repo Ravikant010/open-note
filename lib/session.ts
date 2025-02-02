@@ -44,3 +44,10 @@ function generateFallbackSecret() {
     
     return !!session.userId;
   }
+
+export async function destroySession() {
+  const session = await getSession();
+  session.destroy();
+  await session.save();
+
+}
