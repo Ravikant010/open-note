@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { isLoggedIn } from '@/lib/session';
 
@@ -6,15 +5,22 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes (no authentication required)
-  const publicRoutes = ['/login', '/signup', "/", "/profile/:username"];
+  const publicRoutes = ['/login', '/signup', '/'];
 
   // Check if the current route matches a dynamic public route
-  const isPublicPostRoute = pathname.startsWith('/post/');  
+  const isPublicPostRoute = pathname.startsWith('/post/'); // Matches /post/:id
+  const isProfileRoute = /^\/profile\/[^\/]+$/.test(pathname); // Matches /profile/:username
+
   // Check if the user is logged in
   const isAuthenticated = await isLoggedIn();
 
   // Redirect unauthenticated users to the login page
-  if (!isAuthenticated && !publicRoutes.includes(pathname) && !isPublicPostRoute) {
+  if (
+    !isAuthenticated &&
+    !publicRoutes.includes(pathname) &&
+    !isPublicPostRoute &&
+    !isProfileRoute
+  ) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
