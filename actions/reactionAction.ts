@@ -309,3 +309,40 @@ export async function getPostStats_profile() {
       return { success: false, error: 'Failed to fetch stats' };
     }
   }
+
+
+
+  export async function getPostStats_profileByUserName(username:string) {
+    try {
+
+  
+ 
+      // Query the database for stats
+      const result = await db
+        .select({
+          posts: sql<number>`COUNT(${content.id})`.mapWith(Number),
+          likes: sql<number>`COUNT(${likes.id})`.mapWith(Number),
+          comments: sql<number>`COUNT(${comments.id})`.mapWith(Number),
+        })
+        .from(users)
+        .leftJoin(content, eq(content.userId, users.id)) // Join content created by the user
+        .leftJoin(likes, eq(likes.contentId, content.id)) // Join likes on the content
+        .leftJoin(comments, eq(comments.contentId, content.id)) // Join comments on the content
+        .where(eq(users.name, username)) // Filter by the authenticated user ID
+        .groupBy(users.id); // Group by user to aggregate results
+  
+      if (result.length === 0) {
+        return { success: true, posts: 0, likes: 0, comments: 0 };
+      }
+  
+      return {
+        success: true,
+        posts: result[0].posts,
+        likes: result[0].likes,
+        comments: result[0].comments,
+      };
+    } catch (error) {
+      console.error('Error fetching post stats:', error);
+      return { success: false, error: 'Failed to fetch stats' };
+    }
+  }

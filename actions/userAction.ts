@@ -120,3 +120,26 @@ export async function getAuthorByPostId(postId: string) {
       return { success: false, message: "Failed to fetch author." };
     }
   }
+
+
+
+  
+  export async function getUserByUserName(username:string) {
+
+try{
+  
+      // Query the database to fetch the user by their ID
+      const user = await db.query.users.findFirst({
+        where: eq(users.name, username),
+      });
+  
+      if (!user) {
+        throw new Error("User not found.");
+      }
+  
+      return { success: true, data: user };
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      return { success: false, message: "Failed to fetch user." };
+    }
+  }

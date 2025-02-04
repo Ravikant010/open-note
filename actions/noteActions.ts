@@ -127,7 +127,33 @@ export async function getUserPosts({userId}:{
         return { success: false, message: "Failed to fetch posts" };
     }
 }
+export async function getUserPostsByUserName(username: string) {
+  try {
+    const cachedPosts = await unstable_cache(
+      async () => {
+        // Fetch the user by username
+        const user = await db.query.users.findFirst({
+          where: eq(users.name, username),
+        });
 
+        if (!user) {
+          throw new Error("User not found.");
+        }
+
+        // Fetch posts by user ID
+        const posts = await db.select().from(content).where(eq(content.userId, user.id));
+        return posts;
+      },
+      [`user-posts-${username}`], // Cache key based on username
+      { revalidate: 60 } // Revalidate cache every 60 seconds
+    )();
+
+    return { success: true, data: cachedPosts };
+  } catch (error) {
+    console.error("Error fetching user posts:", error);
+    return { success: false, message: "Failed to fetch posts" };
+  }
+}
 export async function getPostById(id: string) {
     try {
       // Query the database for the post with the given ID

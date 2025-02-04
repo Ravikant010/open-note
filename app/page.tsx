@@ -64,7 +64,6 @@ export default function Home() {
       try {
         // Check if the user is logged in
         const loggedIn = await isLoggedIn();
-        console.log(loggedIn)
         setIsUserLoggedIn(loggedIn);
 
         if (loggedIn) {
@@ -97,7 +96,7 @@ export default function Home() {
       <main className="bg-white">
         <NavBar />
         <Hero />
-        {/* <Page /> */}
+        <Page />
         <Footer />
       </main>
     );
@@ -126,7 +125,6 @@ export default function Home() {
       </div>
 
   </SidebarProvider>
-
   );
 }
 
@@ -148,7 +146,6 @@ import { isLoggedIn } from "@/lib/session";
 import OnBoardingPage, { OnBoarding } from "@/components/on-baording";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Sidebar } from "@/components/Nav-sidebar";
-import { fetchAllPosts, getLatestPosts } from "@/actions/noteActions";
 
  function PostsPage() {
   const [posts, setPosts] = useState<ContentSelect[] | []>([]);
@@ -157,11 +154,9 @@ import { fetchAllPosts, getLatestPosts } from "@/actions/noteActions";
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { success, posts:data } = await fetchAllPosts();
- 
+        const { success, data } = await getUserPosts();
         console.log(data);
         if (success && data) {
-          //@ts-ignore
           setPosts(data);
         } else {
           setError("Failed to load posts.");
