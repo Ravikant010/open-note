@@ -4,7 +4,7 @@ import UserPosts from './UserPosts';
 import { getCurrentUser, getUserByUserName } from "@/actions/userAction";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProfileStats from './ProfileStats';
-import { UserAvatar } from '@/components/user-avatar';
+import { UserAvatar } from './user-avatar';
 
 export default async function ProfilePage({ params }:{params: Promise<{username:string}>}) {
 
