@@ -96,7 +96,7 @@ export default function Home() {
       <main className="bg-white">
         <NavBar />
         <Hero />
-        <Page />
+        {/* <Page /> */}
         <Footer />
       </main>
     );
