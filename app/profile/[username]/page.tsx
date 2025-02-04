@@ -17,7 +17,7 @@ if(!user)
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <div className="flex flex-col items-center space-y-4">
-        <UserAvatar className='w-20 h-20 lg:text-2xl'/>
+        <UserAvatar className='w-20 h-20 lg:text-2xl' username={user.name as string}/>
           <div className="text-center">
          
             {user && (
