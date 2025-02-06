@@ -112,7 +112,7 @@ export default async function PostPage({ params }:{params: Promise<{id:string}>}
     const stats = statsResponse;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 mx-auto w-full">
+    <div className="min-h-screen flex flex-col bg-gray-50 mx-auto w-full tiptap ProseMirror prose dark:prose-invert max-w-none focus:outline-none p-4z">
       {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 py-8 w-full  ">
         <div className="lg:w-7xl w-full mx-auto">
